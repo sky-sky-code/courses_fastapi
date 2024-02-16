@@ -2,9 +2,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
-from routers import api
+from courses.routers import api
 
-import settings
+from courses import settings
 
 app = FastAPI(description='forms.spnavigator.ru', title='FastAPI forms.spnavigator.ru', version='0.7.0')
 
