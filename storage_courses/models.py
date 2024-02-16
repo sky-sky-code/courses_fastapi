@@ -1,9 +1,6 @@
 import uuid
-
 from tortoise import fields, Tortoise
 from tortoise.models import Model
-from tortoise.contrib.pydantic import pydantic_model_creator
-from tortoise.contrib.pydantic.creator import PydanticMeta, PydanticModel
 
 
 class Exchanger(Model):
@@ -20,12 +17,4 @@ class Courses(Model):
 
 
 Tortoise.init_models(["models"], "models")
-
-
-class ExchangerMeta(PydanticMeta):
-    include = ('exchanger', 'courses')
-    exclude = ('courses__uid',)
-
-
-Exchanger_Pydantic = pydantic_model_creator(Exchanger, name='Exchanger', meta_override=ExchangerMeta)
 
