@@ -21,10 +21,12 @@ redis = ">=4.2.0rc1"
 
 
 
+
 [tool.aerich]
 tortoise_orm = "settings.TORTOISE_ORM"
-location = "./migrations"
+location = "./storage_courses/migrations/"
 src_folder = "./."
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

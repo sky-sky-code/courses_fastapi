@@ -14,7 +14,3 @@ class Courses(Model):
     direction = fields.CharField(max_length=128)
     value = fields.FloatField()
     exchanger: fields.ForeignKeyRelation[Exchanger] = fields.ForeignKeyField('models.Exchanger', related_name='courses')
-
-
-Tortoise.init_models(["models"], "models")
-
