@@ -1,12 +1,12 @@
-from pathlib import Path
+import os
 from dotenv import dotenv_values
 
-ROOT_DIR = Path('__file__').parent
+ROOT_DIR = src_path = os.path.dirname(os.path.abspath(__file__))
 
 environ = {}
 
-if (ROOT_DIR / '.env').exists():
-    environ = {**dotenv_values(str(ROOT_DIR / '.env'))}
+if os.path.exists(os.path.join(ROOT_DIR, '.env')):
+    environ = {**dotenv_values(os.path.join(ROOT_DIR, '.env'))}
 
 POSTGRES_URL = environ.get('POSTGRES_URL', 'postgres://dev:dev@127.0.0.1:5432/courses')
 REDIS_URL = environ.get('REDIS_URL', 'redis://localhost:6379/0')
