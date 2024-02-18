@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 import settings
 from courses.stock_market import StockMarket
-from settings import REDIS_URL
 from redis import asyncio as aioredis
 import aio_pika
 
@@ -35,16 +34,17 @@ async def publisher(message):
 
 @router.get('/courses')
 async def get_courses(symbol: str | None = None, symbols: List[str] = Query(None)):
-    redis = await aioredis.from_url(REDIS_URL)
+    redis = await aioredis.from_url(settings.REDIS_URL)
     stock_market = StockMarket()
     if symbol:
         key_symbol = f'courses:symbol-{symbol}'
-        data_symbol = await redis.hgetall(key_symbol)
+        data_symbol = await redis.get(key_symbol)
         if data_symbol:
-            return ExchangeCourses(**data_symbol)
+            return ExchangeCourses(**json.loads(data_symbol.decode().replace('\'', '\"')))
         else:
             course = await stock_market.get_courses('symbol', symbol)
             asyncio.create_task(publisher(json.dumps(course)))
             return ExchangeCourses(**course)
-    else:
+    elif symbols:
         pass
+

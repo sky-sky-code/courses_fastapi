@@ -12,16 +12,18 @@ class Binance:
         'all': lambda pairs: 'ticker/price',
     }
 
+    def prepare_data(self, response_courses):
+        response_courses = response_courses if type(response_courses) == list else [response_courses]
+        for course in response_courses:
+            course['exchanger'] = 'binance'
+            course['courses'] = {'direction': course.pop('symbol'), 'value': course.pop('price')}
+        return response_courses[0] if len(response_courses) == 1 else response_courses
+
     async def get_courses(self, param, pairs):
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(trust_env=True) as session:
             async with session.get(f'{self.binance_api}{self.query_binnance[param](pairs)}') as response:
                 data = await response.json()
-                data['direction'] = data.pop('symbol')
-                data['value'] = data.pop('price')
-                return {
-                    'exchanger': 'binance',
-                    'courses': data
-                }
+                return self.prepare_data(data)
 
 
 class Coingecko:
@@ -40,7 +42,7 @@ class StockMarket:
         asyncio.create_task(self._check_path())
 
     async def _check_path(self):
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(trust_env=True) as session:
             for market, path in self.market_path.items():
                 response = await session.get(self.market_path['binance'])
                 if response.status == 200:
