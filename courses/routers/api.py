@@ -34,6 +34,8 @@ async def publisher(message):
 
 @router.get('/courses')
 async def get_courses(symbol: str | None = None, symbols: List[str] = Query(None)):
+    if symbols is not None and len(symbols) == 1:
+        symbol = symbols[0]
     redis = await aioredis.from_url(settings.REDIS_URL)
     stock_market = StockMarket()
     if symbol:
@@ -43,8 +45,9 @@ async def get_courses(symbol: str | None = None, symbols: List[str] = Query(None
             return ExchangeCourses(**json.loads(data_symbol.decode().replace('\'', '\"')))
         else:
             course = await stock_market.get_courses('symbol', symbol)
-            asyncio.create_task(publisher(json.dumps(course)))
+            asyncio.create_task(publisher(json.dumps([course])))
             return ExchangeCourses(**course)
     elif symbols:
-        pass
-
+        courses_list = await stock_market.get_courses('symbols', symbols)
+        asyncio.create_task(publisher(json.dumps(courses_list)))
+        return [ExchangeCourses(**courses) for courses in courses_list]

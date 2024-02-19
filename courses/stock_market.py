@@ -4,11 +4,11 @@ import aiohttp
 
 
 class Binance:
-    binance_api = 'https://api.binance.com/api/v3/'
+    binance_api = 'https://data-api.binance.vision/api/v3/'
 
     query_binnance = {
         'symbol': lambda pair: f'ticker/price?symbol={pair}',
-        'symbols': lambda pairs: f'ticker/price?symbol={pairs}',
+        'symbols': lambda pairs: f'ticker/price?symbols={pairs}',
         'all': lambda pairs: 'ticker/price',
     }
 
@@ -20,6 +20,8 @@ class Binance:
         return response_courses[0] if len(response_courses) == 1 else response_courses
 
     async def get_courses(self, param, pairs):
+        if param == 'symbols':
+            pairs = str(pairs).replace('\'', '\"').replace(' ', '')
         async with aiohttp.ClientSession(trust_env=True) as session:
             async with session.get(f'{self.binance_api}{self.query_binnance[param](pairs)}') as response:
                 data = await response.json()
