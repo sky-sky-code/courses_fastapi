@@ -54,11 +54,7 @@ class Coingecko:
         }
 
     async def get_courses(self, param, pairs):
-        redis = await aioredis.from_url(settings.REDIS_URL)
         if param == 'symbol':
-            data_symbol = await redis.get(f'{settings.KEY_COURSES_REDIS}:{pairs}')
-            if data_symbol:
-                return data_symbol.decode()
             ids = await self.search_ids(pairs.split('-')[0])
             async with aiohttp.ClientSession(trust_env=True) as session:
                 async with session.get(
@@ -68,9 +64,6 @@ class Coingecko:
         else:
             arr_courses = []
             for pair in pairs:
-                data_symbol = await redis.get(f'{settings.KEY_COURSES_REDIS}:{pairs}')
-                if data_symbol:
-                    arr_courses.append(data_symbol.decode())
                 ids = await self.search_ids(pair.split('-')[0])
                 async with aiohttp.ClientSession(trust_env=True) as session:
                     response = await session.get(
@@ -87,7 +80,6 @@ class StockMarket:
             'binance': 'https://data-api.binance.vision/api/v3/ping',
             'coingecko': f'https://api.coingecko.com/api/v3/ping?x_cg_demo_api_key={COINGECKO_API_KEY}'
         }
-        self.stock_market = Binance()
         asyncio.create_task(self._check_path())
 
     async def _check_path(self):
@@ -95,7 +87,10 @@ class StockMarket:
             for market, path in self.market_path.items():
                 response = await session.get(self.market_path['binance'])
                 if response.status == 200:
-                    self.stock_market = Coingecko()
+                    if market == 'binance':
+                        self.stock_market = Binance()
+                    else:
+                        self.stock_market = Coingecko()
                     break
                 else:
                     raise Exception

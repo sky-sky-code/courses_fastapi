@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
 import settings
-from courses.stock_market import StockMarket
+from utils.stock_market import StockMarket
 from redis import asyncio as aioredis
 import aio_pika
 
