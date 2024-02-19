@@ -25,10 +25,10 @@ class Binance:
         return response_courses[0] if len(response_courses) == 1 else response_courses
 
     async def get_courses(self, param, pairs):
-        pairs = pairs if type(pairs) == list else [pairs]
         async with aiohttp.ClientSession(trust_env=True) as session:
             async with session.get(f'{self.binance_api}{self.query_binnance[param](pairs)}') as response:
                 data = await response.json()
+                pairs = pairs if type(pairs) == list else [pairs]
                 return self.prepare_data(data, pairs)
 
 
@@ -44,33 +44,19 @@ class Coingecko:
                     if coin['symbol'] == symbol:
                         return coin['id']
 
-    def prepare_data(self, response_courses, ids, pair):
-        return {
-            'exchanger': 'coingecko',
-            'courses': {
-                'direction': pair,
-                'value': response_courses[ids][pair.split("-")[1].lower()]
-            }
-        }
-
-    async def get_courses(self, param, pairs):
-        if param == 'symbol':
-            ids = await self.search_ids(pairs.split('-')[0])
-            async with aiohttp.ClientSession(trust_env=True) as session:
-                async with session.get(
-                        f'{self.coingecko_api}/simple/price?ids={ids}&vs_currencies={pairs.split("-")[1]}') as response:
-                    data = await response.json()
-                    return self.prepare_data(data, ids, pairs)
-        else:
-            arr_courses = []
-            for pair in pairs:
-                ids = await self.search_ids(pair.split('-')[0])
-                async with aiohttp.ClientSession(trust_env=True) as session:
-                    response = await session.get(
-                        f'{self.coingecko_api}/simple/price?ids={ids}&vs_currencies={pair.split("-")[1]}')
-                    data = await response.json()
-                    arr_courses.append(self.prepare_data(data, ids, pair))
-            return arr_courses
+    async def get_courses(self, param, pair):
+        ids = await self.search_ids(pair.split('-')[0])
+        async with aiohttp.ClientSession(trust_env=True) as session:
+            async with session.get(
+                    f'{self.coingecko_api}/simple/price?ids={ids}&vs_currencies={pair.split("-")[1]}') as response:
+                data = await response.json()
+                return {
+                        'exchanger': 'coingecko',
+                        'courses': {
+                            'direction': pair,
+                            'value': data[ids][pair.split("-")[1].lower()]
+                        }
+                    }
 
 
 class StockMarket:
