@@ -7,25 +7,26 @@ class Binance:
     binance_api = 'https://data-api.binance.vision/api/v3/'
 
     query_binnance = {
-        'symbol': lambda pair: f'ticker/price?symbol={pair}',
-        'symbols': lambda pairs: f'ticker/price?symbols={pairs}',
+        'symbol': lambda pair: f'ticker/price?symbol={pair.replace("-", "")}',
+        'symbols': lambda pairs: "ticker/price?symbols=" + str(pairs).replace("\'", "\"").
+                                                            replace('-', '').replace(" ", ""),
         'all': lambda pairs: 'ticker/price',
     }
 
-    def prepare_data(self, response_courses):
+    def prepare_data(self, response_courses, pairs):
         response_courses = response_courses if type(response_courses) == list else [response_courses]
+        pairs = {pair.replace("-", ''): pair for pair in pairs}
         for course in response_courses:
             course['exchanger'] = 'binance'
-            course['courses'] = {'direction': course.pop('symbol'), 'value': course.pop('price')}
+            course['courses'] = {'direction': pairs[course.pop('symbol')], 'value': course.pop('price')}
         return response_courses[0] if len(response_courses) == 1 else response_courses
 
     async def get_courses(self, param, pairs):
-        if param == 'symbols':
-            pairs = str(pairs).replace('\'', '\"').replace(' ', '')
         async with aiohttp.ClientSession(trust_env=True) as session:
             async with session.get(f'{self.binance_api}{self.query_binnance[param](pairs)}') as response:
                 data = await response.json()
-                return self.prepare_data(data)
+                pairs = pairs if type(pairs) == list else [pairs]
+                return self.prepare_data(data, pairs)
 
 
 class Coingecko:
