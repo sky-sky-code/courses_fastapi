@@ -39,8 +39,7 @@ async def get_courses(symbol: str | None = None, symbols: List[str] = Query(None
     redis = await aioredis.from_url(settings.REDIS_URL)
     stock_market = StockMarket()
     if symbol:
-        key_symbol = f'courses:symbol:{symbol}'
-        data_symbol = await redis.get(key_symbol)
+        data_symbol = await redis.get(f'{settings.KEY_COURSES_REDIS}:{symbol}')
         if data_symbol:
             return ExchangeCourses(**json.loads(data_symbol.decode().replace('\'', '\"')))
         else:

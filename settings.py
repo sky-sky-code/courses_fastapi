@@ -10,11 +10,14 @@ if os.path.exists(os.path.join(ROOT_DIR, '.env')):
 
 POSTGRES_URL = environ.get('POSTGRES_URL', 'postgres://dev:dev@127.0.0.1:5432/courses')
 REDIS_URL = environ.get('REDIS_URL', 'redis://localhost:6379/0')
-
 QUEUE_NAME = 'courses'
 
 RABBIT_MQ = environ.get('RABBIT_MQ', 'amqp://guest:guest@127.0.0.1/')
 DEBUG = environ.get('DEBUG', False)
+
+KEY_COURSES_REDIS = environ.get('KEY_COURSES_REDIS', 'courses:symbol')
+
+COINGECKO_API_KEY = environ.get('COINGECKO_API_KEY', 'CG-S3XwimKvYK4gNNinMXP4HVS4')
 
 TORTOISE_ORM = {
     'connections': {
@@ -27,5 +30,3 @@ TORTOISE_ORM = {
         },
     },
 }
-
-DEBUG = DEBUG
