@@ -32,21 +32,25 @@ async def publisher(message):
         )
 
 
+async def get_data_and_publish(stock_market, symbol):
+    data_symbol = await stock_market.get_courses('symbol', symbol)
+    print(data_symbol)
+    asyncio.create_task(publisher(json.dumps([data_symbol])))
+    return ExchangeCourses(**data_symbol)
+
+
 @router.get('/courses')
-async def get_courses(symbol: str | None = None, symbols: List[str] = Query(None)):
-    if symbols is not None and len(symbols) == 1:
-        symbol = symbols[0]
+async def get_courses(symbols: List[str] = Query(None)):
     redis = await aioredis.from_url(settings.REDIS_URL)
     stock_market = StockMarket()
-    if symbol:
-        data_symbol = await redis.get(f'{settings.KEY_COURSES_REDIS}:{symbol}')
+    courses_list = []
+    index, len_symbols = 0, len(symbols)
+    while index < len_symbols:
+        data_symbol = await redis.get(f'{settings.KEY_COURSES_REDIS}:{symbols[index]}')
         if data_symbol:
-            return ExchangeCourses(**json.loads(data_symbol.decode().replace('\'', '\"')))
-        else:
-            course = await stock_market.get_courses('symbol', symbol)
-            asyncio.create_task(publisher(json.dumps([course])))
-            return ExchangeCourses(**course)
-    elif symbols:
-        courses_list = await stock_market.get_courses('symbols', symbols)
-        asyncio.create_task(publisher(json.dumps(courses_list)))
-        return [ExchangeCourses(**courses) for courses in courses_list]
+            courses_list.append(ExchangeCourses(**json.loads(data_symbol.decode().replace('\'', '\"'))))
+            symbols.pop(index)
+            index, len_symbols = index - 1, len(symbols)
+        index += 1
+    data = await asyncio.gather(*[get_data_and_publish(stock_market, not_found_symbol) for not_found_symbol in symbols])
+    return courses_list + data
