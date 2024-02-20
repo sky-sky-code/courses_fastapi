@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from courses.routers import api
+from routers import api
 
 
 app = FastAPI(description='forms.spnavigator.ru', title='FastAPI forms.spnavigator.ru', version='0.7.0')
@@ -18,4 +18,4 @@ app.add_middleware(
 app.include_router(api.router)
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    uvicorn.run(app, host='127.0.0.1', port=8000)

@@ -3,10 +3,10 @@ from redis import asyncio as aioredis
 import time
 
 import settings
-from storage_courses.models import Courses
+from models import Courses
 from utils.stock_market import Binance, Coingecko
 from tortoise import Tortoise
-from settings import TORTOISE_ORM
+from storage_courses.settings import TORTOISE_ORM
 
 
 async def update_storage(course):

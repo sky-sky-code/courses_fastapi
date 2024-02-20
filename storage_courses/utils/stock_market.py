@@ -1,8 +1,5 @@
 import asyncio
 import aiohttp
-from redis import asyncio as aioredis
-
-import settings
 from settings import COINGECKO_API_KEY
 
 

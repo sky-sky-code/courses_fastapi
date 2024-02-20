@@ -8,7 +8,7 @@ from tortoise import Tortoise
 
 import settings
 from redis import asyncio as aioredis
-from storage_courses.models import Exchanger, Courses
+from models import Exchanger, Courses
 
 
 async def upload_data_storage(message):

@@ -5,8 +5,8 @@ from typing import List, Dict
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
-import settings
 from utils.stock_market import StockMarket
+import settings
 from redis import asyncio as aioredis
 import aio_pika
 
