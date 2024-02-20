@@ -1,0 +1,54 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+       - POSTGRES_DB=postgres
+       - POSTGRES_USER=postgres
+       - POSTGRES_PASSWORD=postgres
+    expose:
+      - "6543"
+    ports:
+      - "6543:5432"
+    volumes:
+      - ./init_conf.sh:/docker-entrypoint-initdb.d/init_conf.sh
+
+  redis:
+    image: redis:7.0.2-alpine
+    restart: always
+
+    ports:
+      - "6379:6379"
+    command: redis-server
+
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    expose:
+      - '15672'
+    ports:
+      - "15672:15672"
+
+
+  courses:
+    image: python:3.11-slim-buster
+    working_dir: '/courses_fastapi'
+    restart: always
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    expose:
+      - "8000"
+    ports:
+      - "0.0.0.0:8000:8000"
+    environment:
+        REDIS_URL: redis
+    volumes:
+      - .:/courses_fastapi
+    command: bash -c "apt-get update
+      && apt-get install -y curl
+      && curl -sSL https://install.python-poetry.org | python3 -
+      && export PATH=/root/.local/bin:$PATH
+      && poetry install
+      && poetry run python -m courses.main"

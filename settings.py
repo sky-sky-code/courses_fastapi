@@ -9,7 +9,8 @@ if os.path.exists(os.path.join(ROOT_DIR, '.env')):
     environ = {**dotenv_values(os.path.join(ROOT_DIR, '.env'))}
 
 POSTGRES_URL = environ.get('POSTGRES_URL', 'postgres://dev:dev@127.0.0.1:5432/courses')
-REDIS_URL = environ.get('REDIS_URL', 'redis://localhost:6379/0')
+REDIS_URL = environ.get('REDIS_URL', 'redis://127.0.0.1:6379')
+print(REDIS_URL)
 QUEUE_NAME = 'courses'
 
 RABBIT_MQ = environ.get('RABBIT_MQ', 'amqp://guest:guest@127.0.0.1/')
