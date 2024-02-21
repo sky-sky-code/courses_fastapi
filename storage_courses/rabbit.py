@@ -17,7 +17,6 @@ async def upload_data_storage(message):
     await Tortoise.init(config=settings.TORTOISE_ORM)
     await Tortoise.generate_schemas()
     for courses in courses_list:
-        await redis.set(f'{settings.KEY_COURSES_REDIS}:{courses["courses"]["direction"]}', str(courses))
         exchanger = await Exchanger.filter(exchanger=courses['exchanger'])
         if len(exchanger) == 0:
             exchanger = [await Exchanger.create(uid=uuid.uuid4(), exchanger=courses['exchanger'])]
@@ -25,6 +24,7 @@ async def upload_data_storage(message):
         if not courses_exists:
             await Courses.create(uid=uuid.uuid4(), direction=courses["courses"]['direction'],
                                  value=courses["courses"]['value'], exchanger=exchanger[0])
+        await redis.set(f'{settings.KEY_COURSES_REDIS}:{courses["courses"]["direction"]}', str(courses))
 
 
 async def main() -> None:

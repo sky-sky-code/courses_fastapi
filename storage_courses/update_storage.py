@@ -6,11 +6,11 @@ import settings
 from models import Courses
 from utils.stock_market import Binance, Coingecko
 from tortoise import Tortoise
-from storage_courses.settings import TORTOISE_ORM
+from settings import TORTOISE_ORM
 
 
 async def update_storage(course):
-    redis = await aioredis.from_url(settings.REDIS_URL)
+    redis = await aioredis.Redis(host=settings.REDIS_HOST, port=6379)
     if course.exchanger.exchanger == 'binance':
         market = Binance()
     else:
