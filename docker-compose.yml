@@ -16,7 +16,10 @@ services:
   rabbitmq:
     image: rabbitmq:3.10.7-management
     container_name: myrabbitmq
+#    expose:
+#      - "15672"
     ports:
+      - "5672:5672"
       - "15672:15672"
 
   redis:
@@ -26,45 +29,45 @@ services:
     ports:
       - "6379:6379"
 
-  storage_courses:
-    image: python:3.11-slim-buster
-    working_dir: '/storage_courses'
-    restart: always
-    depends_on:
-      - db
-      - redis
-      - rabbitmq
-    environment:
-      REDIS_HOST: myredis
-      RABBITMQ_HOST: myrabbitmq
-      POSTGRES_HOST: db
-    volumes:
-      - ./storage_courses:/storage_courses
-    command: bash -c "apt-get update
-      && apt-get install -y curl
-      && curl -sSL https://install.python-poetry.org | python3 -
-      && export PATH=/root/.local/bin:$PATH
-      && poetry install
-      && poetry run aerich upgrade
-      && poetry run python rabbit.py
-      && poetry run python command/update_storage.py"
-
-  courses:
-    image: python:3.11-slim-buster
-    working_dir: '/courses'
-    restart: always
-    depends_on:
-      - storage_courses
-    environment:
-      REDIS_HOST: myredis
-      RABBITMQ_HOST: myrabbitmq
-    ports:
-      - "0.0.0.0:8000:8000"
-    volumes:
-      - ./courses:/courses
-    command: bash -c "apt-get update
-      && apt-get install -y curl
-      && curl -sSL https://install.python-poetry.org | python3 -
-      && export PATH=/root/.local/bin:$PATH
-      && poetry install
-      && poetry run python main.py"
+#  storage_courses:
+#    image: python:3.11-slim-buster
+#    working_dir: '/storage_courses'
+#    restart: always
+#    depends_on:
+#      - db
+#      - redis
+#      - rabbitmq
+#    environment:
+#      REDIS_HOST: myredis
+#      RABBITMQ_HOST: myrabbitmq
+#      POSTGRES_HOST: db
+#    volumes:
+#      - ./storage_courses:/storage_courses
+#    command: bash -c "apt-get update
+#      && apt-get install -y curl
+#      && curl -sSL https://install.python-poetry.org | python3 -
+#      && export PATH=/root/.local/bin:$PATH
+#      && poetry install
+#      && poetry run aerich upgrade
+#      && poetry run python rabbit.py
+#      && poetry run python command/update_storage.py"
+#
+#  courses:
+#    image: python:3.11-slim-buster
+#    working_dir: '/courses'
+#    restart: always
+#    depends_on:
+#      - storage_courses
+#    environment:
+#      REDIS_HOST: myredis
+#      RABBITMQ_HOST: myrabbitmq
+#    ports:
+#      - "0.0.0.0:8000:8000"
+#    volumes:
+#      - ./courses:/courses
+#    command: bash -c "apt-get update
+#      && apt-get install -y curl
+#      && curl -sSL https://install.python-poetry.org | python3 -
+#      && export PATH=/root/.local/bin:$PATH
+#      && poetry install
+#      && poetry run python main.py"
