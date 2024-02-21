@@ -8,9 +8,13 @@ environ = {}
 if os.path.exists(os.path.join(ROOT_DIR, '.env')):
     environ = {**dotenv_values(os.path.join(ROOT_DIR, '.env'))}
 
-REDIS_URL = environ.get('REDIS_URL', 'redis://127.0.0.1:6379')
+environ.update(**os.environ)
+
+REDIS_HOST = environ.get('REDIS_HOST', '127.0.0.1')
 QUEUE_NAME = 'courses'
-RABBIT_MQ = environ.get('RABBIT_MQ', 'amqp://guest:guest@127.0.0.1/')
+RABBITMQ_HOST = environ.get('RABBITMQ_HOST', '127.0.0.1')
+
+RABBITMQ_URL = environ.get('RABBITMQ_URL', f'amqp://guest:guest@{RABBITMQ_HOST}/')
 
 DEBUG = environ.get('DEBUG', False)
 

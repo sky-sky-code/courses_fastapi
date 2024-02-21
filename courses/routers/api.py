@@ -21,7 +21,7 @@ class ExchangeCourses(BaseModel):
 
 
 async def publisher(message):
-    connection = await aio_pika.connect_robust(settings.RABBIT_MQ)
+    connection = await aio_pika.connect_robust(settings.RABBITMQ_URL)
     async with connection:
         routing_key = settings.QUEUE_NAME
 
@@ -41,7 +41,7 @@ async def get_data_and_publish(stock_market, symbol):
 
 @router.get('/courses')
 async def get_courses(symbols: List[str] = Query(None)):
-    redis = await aioredis.from_url(settings.REDIS_URL)
+    redis = await aioredis.Redis(host=settings.REDIS_HOST, port=6379)
     stock_market = StockMarket()
     courses_list = []
     index, len_symbols = 0, len(symbols)

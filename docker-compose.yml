@@ -1,54 +1,70 @@
-version: '3'
+version: '3.4'
 services:
   db:
     image: postgres
     restart: always
+    container_name: db
     environment:
        - POSTGRES_DB=postgres
        - POSTGRES_USER=postgres
        - POSTGRES_PASSWORD=postgres
-    expose:
-      - "6543"
     ports:
-      - "6543:5432"
+      - "5432:5432"
     volumes:
       - ./init_conf.sh:/docker-entrypoint-initdb.d/init_conf.sh
 
-  redis:
-    image: redis:7.0.2-alpine
-    restart: always
-
-    ports:
-      - "6379:6379"
-    command: redis-server
-
   rabbitmq:
     image: rabbitmq:3.10.7-management
-    expose:
-      - '15672'
+    container_name: myrabbitmq
     ports:
       - "15672:15672"
 
+  redis:
+    image: redis:latest
+    container_name: myredis
+    restart: always
+    ports:
+      - "6379:6379"
 
-  courses:
+  storage_courses:
     image: python:3.11-slim-buster
-    working_dir: '/courses_fastapi'
+    working_dir: '/storage_courses'
     restart: always
     depends_on:
       - db
       - redis
       - rabbitmq
-    expose:
-      - "8000"
-    ports:
-      - "0.0.0.0:8000:8000"
     environment:
-        REDIS_URL: redis
+      REDIS_HOST: myredis
+      RABBITMQ_HOST: myrabbitmq
+      POSTGRES_HOST: db
     volumes:
-      - .:/courses_fastapi
+      - ./storage_courses:/storage_courses
     command: bash -c "apt-get update
       && apt-get install -y curl
       && curl -sSL https://install.python-poetry.org | python3 -
       && export PATH=/root/.local/bin:$PATH
       && poetry install
-      && poetry run python -m courses.main"
+      && poetry run aerich upgrade
+      && poetry run python rabbit.py
+      && poetry run python command/update_storage.py"
+
+  courses:
+    image: python:3.11-slim-buster
+    working_dir: '/courses'
+    restart: always
+    depends_on:
+      - storage_courses
+    environment:
+      REDIS_HOST: myredis
+      RABBITMQ_HOST: myrabbitmq
+    ports:
+      - "0.0.0.0:8000:8000"
+    volumes:
+      - ./courses:/courses
+    command: bash -c "apt-get update
+      && apt-get install -y curl
+      && curl -sSL https://install.python-poetry.org | python3 -
+      && export PATH=/root/.local/bin:$PATH
+      && poetry install
+      && poetry run python main.py"

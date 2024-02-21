@@ -12,7 +12,7 @@ from models import Exchanger, Courses
 
 
 async def upload_data_storage(message):
-    redis = await aioredis.from_url(settings.REDIS_URL)
+    redis = await aioredis.Redis(host=settings.REDIS_HOST, port=6379)
     courses_list = json.loads(message.body.decode())
     await Tortoise.init(config=settings.TORTOISE_ORM)
     await Tortoise.generate_schemas()
@@ -26,7 +26,7 @@ async def upload_data_storage(message):
 
 
 async def main() -> None:
-    connection = await aio_pika.connect_robust(settings.RABBIT_MQ)
+    connection = await aio_pika.connect_robust(settings.RABBITMQ_URL)
 
     async with connection:
         channel = await connection.channel()

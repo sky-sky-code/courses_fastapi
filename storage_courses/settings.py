@@ -8,12 +8,18 @@ environ = {}
 if os.path.exists(os.path.join(ROOT_DIR, '.env')):
     environ = {**dotenv_values(os.path.join(ROOT_DIR, '.env'))}
 
-POSTGRES_URL = environ.get('POSTGRES_URL', 'postgres://dev:dev@127.0.0.1:5432/courses')
-REDIS_URL = environ.get('REDIS_URL', 'redis://127.0.0.1:6379')
+environ.update(**os.environ)
+POSTGRES_HOST = environ.get('POSTGRES_HOST', '127.0.0.1')
 
+POSTGRES_URL = environ.get('POSTGRES_URL', f'postgres://dev:dev@{POSTGRES_HOST}:5432/courses')
+
+REDIS_HOST = environ.get('REDIS_HOST', '127.0.0.1')
 QUEUE_NAME = 'courses'
+RABBITMQ_HOST = environ.get('RABBITMQ_HOST', '127.0.0.1')
 
-RABBIT_MQ = environ.get('RABBIT_MQ', 'amqp://guest:guest@127.0.0.1/')
+RABBITMQ_URL = environ.get('RABBITMQ_URL', f'amqp://guest:guest@{RABBITMQ_HOST}/')
+
+DEBUG = environ.get('DEBUG', False)
 
 KEY_COURSES_REDIS = environ.get('KEY_COURSES_REDIS', 'courses:symbol')
 
